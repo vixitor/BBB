@@ -25,6 +25,8 @@ db/*.db
 
 reports/screenshots/*
 !reports/screenshots/.gitkeep
+!reports/screenshots/smoke_test_output.png
+!reports/screenshots/deepseek_agent_output.png
 
 *.log
 *.tmp

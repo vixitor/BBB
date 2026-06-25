@@ -4,6 +4,7 @@ import sqlite3
 from pathlib import Path
 
 import pandas as pd
+from PIL import Image as PILImage
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
@@ -28,6 +29,7 @@ from reportlab.platypus import (
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DB_PATH = ROOT_DIR / "db" / "nba_analysis.sqlite"
 FIG_DIR = ROOT_DIR / "reports" / "figures"
+SCREENSHOT_DIR = ROOT_DIR / "reports" / "screenshots"
 OUT_DIR = ROOT_DIR / "output" / "pdf"
 OUT_PATH = OUT_DIR / "实验报告.pdf"
 
@@ -113,6 +115,13 @@ def code_block(code: str, styles) -> Table:
         )
     )
     return table
+
+
+def scaled_image(path: Path, max_width: float, max_height: float) -> Image:
+    with PILImage.open(path) as source:
+        width, height = source.size
+    scale = min(max_width / width, max_height / height)
+    return Image(str(path), width=width * scale, height=height * scale)
 
 
 def build_styles():
@@ -393,7 +402,20 @@ streamlit run src/app.py
         ["无 API Key 情况", "python src/agent.py", "通过，提示配置 DEEPSEEK_API_KEY，不直接崩溃。"],
     ], columns=["测试项", "命令/方式", "结果"]), [1.4, 1.8, 3.1]))
 
-    story.append(p("十二、总结", styles["H1"]))
+    story.append(p("十二、运行截图", styles["H1"]))
+    story.append(p("以下截图用于证明项目可以在本地环境实际运行。图表截图已在正文“Streamlit 界面与可视化”部分展示，本节补充烟雾测试和 DeepSeek Agent 端到端查询链路截图。", styles["Body"]))
+    screenshots = [
+        ("smoke_test_output.png", "图 4 本地烟雾测试运行截图。依赖导入、数据库检查和 SQL 安全检查均通过。", 4.35 * inch),
+        ("deepseek_agent_output.png", "图 5 DeepSeek Agent 自然语言查询运行截图。系统生成只读 SQL、执行查询并返回中文分析结论。", 6.1 * inch),
+    ]
+    for index, (image_name, caption, max_height) in enumerate(screenshots):
+        if index == 1:
+            story.append(PageBreak())
+        path = SCREENSHOT_DIR / image_name
+        if path.exists():
+            story.append(KeepTogether([scaled_image(path, 6.2 * inch, max_height), p(caption, styles["Small"])]))
+
+    story.append(p("十三、总结", styles["H1"]))
     story.append(p("本实验完成了从 NBA 公开数据集下载、pandas 清洗、SQLite 建模、SQL 查询验证，到 LangChain + DeepSeek Data Agent 和 Streamlit 可视化展示的完整流程。系统能够根据中文业务问题生成只读 SQL，执行真实数据库查询，并基于查询结果生成中文解释。实验过程中重点保证了数据链路可复现、SQL 查询结果真实、API Key 不泄露、危险 SQL 被拦截，符合课程对数据处理、建库、查询、智能体和可视化展示的综合要求。", styles["Body"]))
 
     doc = SimpleDocTemplate(
