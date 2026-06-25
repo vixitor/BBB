@@ -68,7 +68,7 @@ DEEPSEEK_MODEL=deepseek-v4-flash
 python src/download_data.py
 ```
 
-也可以手动从 Kaggle 下载并解压，把以下文件放入 `data/raw/`：
+脚本会优先使用 Kaggle CLI；如果本机没有 Kaggle Token，会自动尝试 Kaggle 的公开下载 API。也可以手动从 Kaggle 下载并解压，把以下文件放入 `data/raw/`：
 
 - `games.csv`
 - `games_details.csv`
@@ -94,6 +94,12 @@ python src/build_database.py
 
 ```bash
 streamlit run src/app.py
+```
+
+不调用大模型的本地烟雾测试：
+
+```bash
+python src/smoke_test.py
 ```
 
 ## 内置分析问题

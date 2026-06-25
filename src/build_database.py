@@ -276,6 +276,21 @@ VERIFICATION_QUERIES = {
 }
 
 
+def dataframe_to_markdown(df: pd.DataFrame) -> str:
+    if df.empty:
+        return "_No rows returned._"
+
+    columns = [str(column) for column in df.columns]
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "| " + " | ".join("---" for _ in columns) + " |",
+    ]
+    for _, row in df.iterrows():
+        values = [str(row[column]) if pd.notna(row[column]) else "" for column in df.columns]
+        lines.append("| " + " | ".join(values) + " |")
+    return "\n".join(lines)
+
+
 def read_processed(table: str) -> pd.DataFrame:
     path = PROCESSED_DIR / TABLE_FILES[table]
     if not path.exists():
@@ -313,7 +328,7 @@ def run_verification() -> None:
             print(f"\n[{name}]")
             print(df.to_string(index=False))
             lines.extend([f"## {name}", "", "```sql", sql.strip(), "```", ""])
-            lines.extend([df.to_markdown(index=False), ""])
+            lines.extend([dataframe_to_markdown(df), ""])
 
     output_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nWrote verification report: {output_path}")
