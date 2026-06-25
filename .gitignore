@@ -28,3 +28,4 @@ reports/screenshots/*
 
 *.log
 *.tmp
+tmp/

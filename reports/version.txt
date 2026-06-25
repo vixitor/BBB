@@ -11,5 +11,8 @@ tabulate: 0.10.0
 Matplotlib: 3.10.9
 python-docx: 1.2.0
 pdf2image: 1.17.0
+ReportLab: 5.0.0
+PyMuPDF: 1.27.2.3
+pypdf: 6.14.2
 Database: SQLite
 LLM Provider: DeepSeek API
